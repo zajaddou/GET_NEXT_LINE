@@ -1,2 +1,4 @@
-salama
-welcome
+LEET
+1337
+PORT
+SORT
