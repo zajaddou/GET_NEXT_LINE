@@ -1,0 +1,24 @@
+NAME = get_next_line.a
+SRC = get_next_line.c get_next_line_utils.c
+OBJ = $(SRC:.c=.o)
+CC = cc
+CFLAGS = -Wall -Wextra -Werror
+RM = rm -f
+
+all: $(NAME) clean run
+
+$(NAME): $(OBJ) 
+	ar -rcs $(NAME) $(OBJ)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	$(RM) $(OBJ)
+
+fclean: clean
+	$(RM) $(NAME)
+
+run:
+	${CC} main.c get_next_line.a && clear && ./a.out && rm a.out
+re: run fclean all
