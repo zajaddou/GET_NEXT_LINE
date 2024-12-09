@@ -20,5 +20,5 @@ fclean: clean
 	$(RM) $(NAME)
 
 run:
-	${CC} main.c get_next_line.a && clear && ./a.out && rm a.out
+	${CC} main.c get_next_line.a && clear && ./a.out && rm a.out get_next_line.a
 re: run fclean all

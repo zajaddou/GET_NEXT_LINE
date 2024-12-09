@@ -6,32 +6,36 @@
 /*   By: zajaddou <zajaddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 06:24:17 by zajaddou          #+#    #+#             */
-/*   Updated: 2024/12/07 06:25:29 by zajaddou         ###   ########.fr       */
+/*   Updated: 2024/12/08 22:28:12 by zajaddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int	get_index(char *str)
+size_t	ft_strlen(const char *s)
 {
-	int		i;
+	size_t	len;
 
-	i = 0;
-	while (str[i])
-	{
-		if (str[i] == '\n')
-			return (i);
-		i++;
-	}
-	return (-1);
+	len = 0;
+	if (!s)
+		return (0);
+	while (s[len])
+		len++;
+	return (len);
 }
 
-char	*get_line(int index, char **src)
+char	*get_line(char **src)
 {
 	char	*result;
 	int		i;
+	int		index;
 
-	result = (char *)malloc(sizeof(char) * (index + 1));
+	index = 0;
+	result = ft_strchr(*src, '\n');
+	if(!result)
+		return (*src);
+	index = result - *src;
+	result = (char *)malloc(sizeof(char) * (index + 2));
 	if (!result)
 		return (NULL);
 	i = 0;
@@ -50,20 +54,34 @@ char	*get_next_line(int fd)
 	char	*buffer;
 	char	*result;
 	int		counter;
-	int		index;
+	static char *storage;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (NULL);
-	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 2));
-	if (!buffer)
-		return (NULL);
-	counter = read(fd, buffer, BUFFER_SIZE);
-	if (!counter)
 	{
-		free(buffer);
+		free(storage);
+		storage = NULL;
 		return (NULL);
 	}
-	index = get_index(buffer);
-	result = get_line(index, &buffer);
+	
+	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buffer)
+		return (NULL);
+
+	buffer[BUFFER_SIZE] = '\0';
+	counter = 1;
+	while (!ft_strchr(storage, '\n') && counter > 0)
+	{
+		counter = read(fd, buffer, BUFFER_SIZE);
+		if(counter == 0)
+		{
+			break ;
+		}
+		storage = ft_strjoin(storage, buffer);
+		
+		if (!storage)
+			break ;
+	}
+	result = get_line(&storage);
+	
 	return (result);
 }
