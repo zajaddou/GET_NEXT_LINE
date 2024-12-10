@@ -6,33 +6,45 @@
 /*   By: zajaddou <zajaddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/07 06:24:17 by zajaddou          #+#    #+#             */
-/*   Updated: 2024/12/08 22:28:12 by zajaddou         ###   ########.fr       */
+/*   Updated: 2024/12/10 06:10:19 by zajaddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-size_t	ft_strlen(const char *s)
+char	*handle_empty_storage(char **storage)
 {
-	size_t	len;
-
-	len = 0;
-	if (!s)
-		return (0);
-	while (s[len])
-		len++;
-	return (len);
+	if (!*storage || **storage == '\0')
+	{
+		free(*storage);
+		*storage = NULL;
+		return (NULL);
+	}
+	return (*storage);
 }
 
-char	*get_line(char **src)
+int	is_valid(int fd, char **storage)
+{
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	{
+		*storage = handle_empty_storage(storage);
+		return (0);
+	}
+	return (1);
+}
+
+char	*get_next(char **src)
 {
 	char	*result;
 	int		i;
 	int		index;
 
+	if (!*src || !**src)
+		return (NULL);
+
 	index = 0;
 	result = ft_strchr(*src, '\n');
-	if(!result)
+	if (!result)
 		return (*src);
 	index = result - *src;
 	result = (char *)malloc(sizeof(char) * (index + 2));
@@ -56,13 +68,9 @@ char	*get_next_line(int fd)
 	int		counter;
 	static char *storage;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
-	{
-		free(storage);
-		storage = NULL;
+	if (!is_valid(fd, &storage))
 		return (NULL);
-	}
-	
+
 	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (!buffer)
 		return (NULL);
@@ -72,16 +80,24 @@ char	*get_next_line(int fd)
 	while (!ft_strchr(storage, '\n') && counter > 0)
 	{
 		counter = read(fd, buffer, BUFFER_SIZE);
-		if(counter == 0)
-		{
-			break ;
-		}
+		if (counter == 0)
+			break;
+
+		buffer[counter] = '\0';
+
 		storage = ft_strjoin(storage, buffer);
-		
 		if (!storage)
-			break ;
+			break;
 	}
-	result = get_line(&storage);
-	
+
+	free(buffer);
+	if (counter == 0 && handle_empty_storage(&storage) == NULL)
+		return (NULL);
+
+	result = get_next(&storage);
+
+	if (storage == result)
+		storage = handle_empty_storage(&storage);
+
 	return (result);
 }
