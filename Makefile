@@ -19,6 +19,10 @@ clean:
 fclean: clean
 	$(RM) $(NAME)
 
+paco:
+	clear && paco -in -t 2
+
 run:
 	${CC} main.c get_next_line.a && clear && ./a.out && rm a.out get_next_line.a
+
 re: run fclean all

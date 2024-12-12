@@ -1,103 +1,85 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: zajaddou <zajaddou@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/07 06:24:17 by zajaddou          #+#    #+#             */
-/*   Updated: 2024/12/10 06:10:19 by zajaddou         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*handle_empty_storage(char **storage)
+char *read_all_file(int fd)
 {
-	if (!*storage || **storage == '\0')
-	{
-		free(*storage);
-		*storage = NULL;
-		return (NULL);
-	}
-	return (*storage);
+	char 	*old;
+    char	*buffer;
+    char	*result;
+    int		count;
+
+    result = NULL;
+    buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+    if (!buffer)
+        return NULL;
+    while (1)
+    {
+        count = read(fd, buffer, BUFFER_SIZE);
+        if (count <= 0)  // ENF or Err
+            break;
+        buffer[count] = '\0';
+		old = result;
+        result = ft_strjoin(result, buffer);
+		free(old);
+        if (!result)
+            break;
+    }
+
+    free(buffer);
+    return result;
 }
 
-int	is_valid(int fd, char **storage)
+char    *ft_get_line(char **src)
 {
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
-	{
-		*storage = handle_empty_storage(storage);
-		return (0);
-	}
-	return (1);
+    char    *result;
+    char    *newline;
+    int     index;
+
+    if (!*src || !**src )
+        return NULL;
+
+    newline = ft_strchr(*src, '\n');
+    if (newline)
+        index = newline - *src;
+    else
+        index = ft_strlen(*src);
+
+    result = (char *)malloc(sizeof(char) * (index + 2));
+    if (!result)
+        return NULL;
+
+    ft_strncpy(result, *src, index + 1);
+    result[index + 1] = '\0';
+
+    *src += index + 1;
+    return result;
 }
 
-char	*get_next(char **src)
+char    *get_next_line(int fd)
 {
-	char	*result;
-	int		i;
-	int		index;
+    static char *storage;
+    char        *result;
 
-	if (!*src || !**src)
-		return (NULL);
+    if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0))
+        return NULL;
 
-	index = 0;
-	result = ft_strchr(*src, '\n');
-	if (!result)
-		return (*src);
-	index = result - *src;
-	result = (char *)malloc(sizeof(char) * (index + 2));
-	if (!result)
-		return (NULL);
-	i = 0;
-	while (**src && i <= index)
-	{
-		result[i] = **src;
-		(*src)++;
-		i++;
-	}
-	result[i] = '\0';
-	return (result);
-}
+    if (!storage) {
+        storage = read_all_file(fd);
+        if (!storage)
+            return NULL;
+    }
 
-char	*get_next_line(int fd)
-{
-	char	*buffer;
-	char	*result;
-	int		counter;
-	static char *storage;
+    result = ft_get_line(&storage);
 
-	if (!is_valid(fd, &storage))
-		return (NULL);
+    if (!result || !*storage)
+        storage = NULL;
 
-	buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (!buffer)
-		return (NULL);
+    if (storage == result)
+    {
+        free(result);
+        free(storage);
+        storage = NULL;
+    }
 
-	buffer[BUFFER_SIZE] = '\0';
-	counter = 1;
-	while (!ft_strchr(storage, '\n') && counter > 0)
-	{
-		counter = read(fd, buffer, BUFFER_SIZE);
-		if (counter == 0)
-			break;
-
-		buffer[counter] = '\0';
-
-		storage = ft_strjoin(storage, buffer);
-		if (!storage)
-			break;
-	}
-
-	free(buffer);
-	if (counter == 0 && handle_empty_storage(&storage) == NULL)
-		return (NULL);
-
-	result = get_next(&storage);
-
-	if (storage == result)
-		storage = handle_empty_storage(&storage);
-
-	return (result);
+    return result;
 }
