@@ -5,7 +5,7 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror
 RM = rm -f
 
-all: $(NAME) clean run
+all: $(NAME) clean 
 
 $(NAME): $(OBJ) 
 	ar -rcs $(NAME) $(OBJ)

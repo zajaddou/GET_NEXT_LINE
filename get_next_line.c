@@ -1,85 +1,102 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: zajaddou <zajaddou@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/13 12:49:05 by zajaddou          #+#    #+#             */
+/*   Updated: 2024/12/13 13:25:36 by zajaddou         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char *read_all_file(int fd)
+size_t	ft_strlen(const char *s)
 {
-	char 	*old;
-    char	*buffer;
-    char	*result;
-    int		count;
+	size_t	len;
 
-    result = NULL;
-    buffer = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-    if (!buffer)
-        return NULL;
-    while (1)
-    {
-        count = read(fd, buffer, BUFFER_SIZE);
-        if (count <= 0)  // ENF or Err
-            break;
-        buffer[count] = '\0';
-		old = result;
-        result = ft_strjoin(result, buffer);
-		free(old);
-        if (!result)
-            break;
-    }
-
-    free(buffer);
-    return result;
+	len = 0;
+	if (!s)
+		return (0);
+	while (s[len])
+		len++;
+	return (len);
 }
 
-char    *ft_get_line(char **src)
+static char	*read_line(int fd, char *str)
 {
-    char    *result;
-    char    *newline;
-    int     index;
+	char	*buff;
+	char	*temp;
+	int		bread;
 
-    if (!*src || !**src )
-        return NULL;
-
-    newline = ft_strchr(*src, '\n');
-    if (newline)
-        index = newline - *src;
-    else
-        index = ft_strlen(*src);
-
-    result = (char *)malloc(sizeof(char) * (index + 2));
-    if (!result)
-        return NULL;
-
-    ft_strncpy(result, *src, index + 1);
-    result[index + 1] = '\0';
-
-    *src += index + 1;
-    return result;
+	buff = malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buff)
+		return (free(str), str = NULL, NULL);
+	while (!ft_strchr(str, '\n'))
+	{
+		bread = read(fd, buff, BUFFER_SIZE);
+		if (bread < 0)
+			return (free(buff), buff = NULL, free(str), str = NULL, NULL);
+		if (bread == 0)
+			break ;
+		buff[bread] = '\0';
+		temp = str;
+		str = ft_strjoin(str, buff);
+		free(temp);
+		temp = NULL;
+		if (!str)
+			return (free(buff), buff = NULL, NULL);
+	}
+	free(buff);
+	buff = NULL;
+	return (str);
 }
 
-char    *get_next_line(int fd)
+static char	*one_line(char **src)
 {
-    static char *storage;
-    char        *result;
+	char	*result;
+	char	*temp;
+	int		index;
+	char	*new;
 
-    if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0))
-        return NULL;
+	if (!*src || !**src)
+		return (NULL);
+	new = ft_strchr(*src, '\n');
+	if (new)
+		index = new - *src;
+	else
+		index = ft_strlen(*src);
+	result = malloc(sizeof(char) * (index + 2));
+	if (!result)
+		return (NULL);
+	ft_strncpy(result, *src, index + 1);
+	result[index + 1] = '\0';
+	if (new)
+		temp = ft_strdup(*src + index + 1);
+	else
+		temp = NULL;
+	free(*src);
+	*src = NULL;
+	*src = temp;
+	return (result);
+}
 
-    if (!storage) {
-        storage = read_all_file(fd);
-        if (!storage)
-            return NULL;
-    }
+char	*get_next_line(int fd)
+{
+	static char	*str;
+	char		*res;
 
-    result = ft_get_line(&storage);
-
-    if (!result || !*storage)
-        storage = NULL;
-
-    if (storage == result)
-    {
-        free(result);
-        free(storage);
-        storage = NULL;
-    }
-
-    return result;
+	if (fd < 0 || BUFFER_SIZE <= 0 || !(BUFFER_SIZE < INT_MAX))
+		return (NULL);
+	str = read_line(fd, str);
+	if (!str)
+		return (NULL);
+	res = one_line(&str);
+	if (!str || !*str)
+	{
+		free(str);
+		str = NULL;
+	}
+	return (res);
 }
