@@ -6,7 +6,7 @@
 /*   By: zajaddou <zajaddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/13 12:49:05 by zajaddou          #+#    #+#             */
-/*   Updated: 2024/12/13 13:25:36 by zajaddou         ###   ########.fr       */
+/*   Updated: 2024/12/14 08:18:01 by zajaddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ static char	*one_line(char **src)
 	if (new)
 		index = new - *src;
 	else
-		index = ft_strlen(*src);
+		index = ft_strlen(*src) - 1;
 	result = malloc(sizeof(char) * (index + 2));
 	if (!result)
 		return (NULL);
