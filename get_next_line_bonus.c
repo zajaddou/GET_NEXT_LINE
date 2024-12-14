@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: zajaddou <zajaddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/13 12:49:05 by zajaddou          #+#    #+#             */
-/*   Updated: 2024/12/14 14:35:04 by zajaddou         ###   ########.fr       */
+/*   Created: 2024/12/14 10:24:21 by zajaddou          #+#    #+#             */
+/*   Updated: 2024/12/14 14:35:26 by zajaddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 size_t	ft_strlen(const char *s)
 {
@@ -84,19 +84,19 @@ static char	*one_line(char **src)
 
 char	*get_next_line(int fd)
 {
-	static char	*str;
+	static char	*fd_buffers[OPEN_MAX];
 	char		*res;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || !(BUFFER_SIZE < INT_MAX))
+	if (fd < 0 || fd >= OPEN_MAX || BUFFER_SIZE <= 0 || !(BUFFER_SIZE < INT_MAX))
 		return (NULL);
-	str = read_line(fd, str);
-	if (!str)
+	fd_buffers[fd] = read_line(fd, fd_buffers[fd]);
+	if (!fd_buffers[fd])
 		return (NULL);
-	res = one_line(&str);
-	if (!str || !*str)
+	res = one_line(&fd_buffers[fd]);
+	if (!fd_buffers[fd] || !*fd_buffers[fd])
 	{
-		free(str);
-		str = NULL;
+		free(fd_buffers[fd]);
+		fd_buffers[fd] = NULL;
 	}
 	return (res);
 }
