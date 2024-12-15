@@ -14,7 +14,7 @@ all: $(NAME) clean
 $(NAME): $(OBJ) 
 	ar -rcs $(NAME) $(OBJ)
 
-%.o: %.c
+%.o: %.c get_next_line.h 
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
