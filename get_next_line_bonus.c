@@ -6,7 +6,7 @@
 /*   By: zajaddou <zajaddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/14 10:24:21 by zajaddou          #+#    #+#             */
-/*   Updated: 2024/12/14 15:05:12 by zajaddou         ###   ########.fr       */
+/*   Updated: 2024/12/16 23:10:34 by zajaddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,20 +84,20 @@ static char	*one_line(char **src)
 
 char	*get_next_line(int fd)
 {
-	static char	*fd_buffers[OPEN_MAX];
+	static char	*storage[OPEN_MAX];
 	char		*res;
 
 	if (fd < 0 || fd >= OPEN_MAX || BUFFER_SIZE <= 0
-		|| !(BUFFER_SIZE < INT_MAX))
+		|| BUFFER_SIZE > INT_MAX)
 		return (NULL);
-	fd_buffers[fd] = read_line(fd, fd_buffers[fd]);
-	if (!fd_buffers[fd])
+	storage[fd] = read_line(fd, storage[fd]);
+	if (!storage[fd])
 		return (NULL);
-	res = one_line(&fd_buffers[fd]);
-	if (!fd_buffers[fd] || !*fd_buffers[fd])
+	res = one_line(&storage[fd]);
+	if (!storage[fd] || !*storage[fd])
 	{
-		free(fd_buffers[fd]);
-		fd_buffers[fd] = NULL;
+		free(storage[fd]);
+		storage[fd] = NULL;
 	}
 	return (res);
 }

@@ -6,7 +6,7 @@
 /*   By: zajaddou <zajaddou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/13 12:49:05 by zajaddou          #+#    #+#             */
-/*   Updated: 2024/12/15 23:20:49 by zajaddou         ###   ########.fr       */
+/*   Updated: 2024/12/16 05:49:19 by zajaddou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ char	*get_next_line(int fd)
 	static char	*str;
 	char		*res;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || !(BUFFER_SIZE < INT_MAX))
+	if (fd < 0 || BUFFER_SIZE <= 0 || BUFFER_SIZE > INT_MAX)
 		return (NULL);
 	str = read_line(fd, str);
 	if (!str)
