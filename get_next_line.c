@@ -30,7 +30,7 @@ static char	*read_line(int fd, char *str)
 	char	*temp;
 	int		bread;
 
-	buff = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	buff = (char *)malloc((size_t)BUFFER_SIZE + 1);
 	if (!buff)
 		return (free(str), str = NULL, NULL);
 	while (!ft_strchr(str, '\n'))
@@ -67,7 +67,7 @@ static char	*one_line(char **src)
 		index = new - *src;
 	else
 		index = ft_strlen(*src) - 1;
-	result = (char *)malloc(sizeof(char) * (index + 2));
+	result = (char *)malloc(index + 2);
 	if (!result)
 		return (NULL);
 	ft_strncpy(result, *src, index + 1);
